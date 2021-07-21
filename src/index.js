@@ -1,3 +1,6 @@
+require('dotenv').config();
+require('./dbmongo');
+
 const express = require('express');
 const cors = require('cors');
 
