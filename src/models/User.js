@@ -12,7 +12,7 @@ const userSchema = new Schema({
     minlength: 2,
     maxlength: 45
   },
-  lastname: {
+  lastName: {
     type: String,
     minlength: 2,
     maxlength: 45
@@ -38,11 +38,7 @@ const userSchema = new Schema({
     maxlength: 45,
     unique: true
   },
-  password: {
-    type: String,
-    minlength: 6,
-    maxlength: 45
-  },
+  password: String,
   date: Date
 });
 

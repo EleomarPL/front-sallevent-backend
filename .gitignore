@@ -1,5 +1,6 @@
 .vscode
 .env
+/request
 
 # dependencies
 /node_modules
