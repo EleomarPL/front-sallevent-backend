@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 
 const userRouter = require('./controllers/userRouter');
+const loginRouter = require('./controllers/login');
 
 const notFound = require('./middlewares/notFound');
 const handleErrors = require('./middlewares/handleErrors');
@@ -17,6 +18,7 @@ app.use(express.json());
 app.set('port', process.env.PORT || 4000);
 
 app.use('/api/user', userRouter);
+app.use('/api/login', loginRouter);
 
 app.use(notFound);
 app.use(handleErrors);
