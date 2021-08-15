@@ -2,17 +2,13 @@ const userAdminRouter = require('express').Router();
 const bcrypt = require('bcrypt');
 
 const User = require('../models/User');
-const userStractor = require('../middlewares/userStractor');
+const adminStractor = require('../middlewares/adminStractor');
 
-userAdminRouter.put('/edit-data-admin', userStractor, async(req, res, next) => {
+userAdminRouter.put('/edit-data-admin', adminStractor, async(req, res, next) => {
   const {
     name, lastName, motherLastName, phone, email, userName
   } = req.body;
-  const {userId: id, type} = req;
-  if (type === 1)
-    return res.status(400).json({
-      error: 'This user is not valid'
-    });
+  const {userId: id} = req;
   try {
     if (!(name && lastName && motherLastName && phone && email &&
       userName)
@@ -31,15 +27,11 @@ userAdminRouter.put('/edit-data-admin', userStractor, async(req, res, next) => {
     next(err);
   }
 });
-userAdminRouter.put('/edit-password-admin/', userStractor, async(req, res, next) => {
+userAdminRouter.put('/edit-password-admin/', adminStractor, async(req, res, next) => {
   const {
     oldPassword, newPassword
   } = req.body;
-  const {userId: id, type} = req;
-  if (type === 1)
-    return res.status(400).json({
-      error: 'This user is not valid'
-    });
+  const {userId: id} = req;
   try {
     if (!(oldPassword && newPassword)) {
       return res.status(400).json({

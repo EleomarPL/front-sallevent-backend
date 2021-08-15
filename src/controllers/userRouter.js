@@ -5,11 +5,7 @@ const User = require('../models/User');
 const userStractor = require('../middlewares/userStractor');
 
 userRouter.get('/', userStractor, async(req, res) => {
-  const {userId: id, type} = req;
-  if ( type === 0)
-    return res.status(400).json({
-      error: 'This user is not valid'
-    });
+  const {userId: id} = req;
   const user = await User.findById(id);
   res.json(user);
 });
@@ -43,11 +39,7 @@ userRouter.put('/edit-data-user/', userStractor, async(req, res, next) => {
   const {
     name, lastName, motherLastName, phone, email, userName
   } = req.body;
-  const {userId: id, type} = req;
-  if (type === 0)
-    return res.status(400).json({
-      error: 'This user is not valid'
-    });
+  const {userId: id} = req;
   try {
     if (!(name && lastName && motherLastName && phone && email &&
       userName)
@@ -71,11 +63,7 @@ userRouter.put('/edit-password-user/', userStractor, async(req, res, next) => {
   const {
     oldPassword, newPassword
   } = req.body;
-  const {userId: id, type} = req;
-  if (type === 0)
-    return res.status(400).json({
-      error: 'This user is not valid'
-    });
+  const {userId: id} = req;
   try {
     if (!(oldPassword && newPassword)) {
       return res.status(400).json({
@@ -104,11 +92,7 @@ userRouter.put('/edit-password-user/', userStractor, async(req, res, next) => {
 });
 
 userRouter.delete('/delete-user', userStractor, (req, res, next) => {
-  const {userId: id, type} = req;
-  if (type === 0)
-    return res.status(400).json({
-      error: 'This user is not valid'
-    });
+  const {userId: id} = req;
   User.findByIdAndRemove(id).then(() => {
     res.status(204).end();
   }).catch(err => {

@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
   }
 
   const {id: userId, type} = decodeToken;
-  if ( type === 0)
+  if ( type === 1)
     return res.status(400).json({
       error: 'This user is not valid'
     });
