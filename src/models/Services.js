@@ -5,7 +5,8 @@ const servicesSchedule = new Schema({
   name: {
     type: String,
     minlength: 2,
-    maxlength: 45
+    maxlength: 45,
+    unique: true
   },
   detail: {
     type: String,
