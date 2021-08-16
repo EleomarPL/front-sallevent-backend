@@ -1,6 +1,6 @@
 const reservationRouter = require('express').Router();
 
-const adminStractor = require('../middlewares/adminStractor');
+const userStractor = require('../middlewares/userStractor');
 
 const FolioServices = require('../models/FolioServices');
 const SelectedServices = require('../models/SelectedServices');
@@ -13,7 +13,7 @@ reservationRouter.get('/get-only-date-reservations', async(req, res) => {
   res.send(filterOnlyDate);
 });
 
-reservationRouter.post('/create-reservation', adminStractor, async(req, res, next) => {
+reservationRouter.post('/create-reservation', userStractor, async(req, res, next) => {
   const {totalServices, listSelectedServices = [], typeEvent, dateReservationStart, dateReservationEnd} = req.body;
   let idRoom = process.env.ID_ROOM;
   const {userId: id} = req;
