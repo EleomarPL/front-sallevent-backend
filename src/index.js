@@ -9,6 +9,7 @@ const loginRouter = require('./controllers/login');
 const userAdminRouter = require('./controllers/userAdminRouter');
 const serviceRouter = require('./controllers/serviceRouter');
 const contactRouter = require('./controllers/contactRouter');
+const reservationRouter = require('./controllers/reservationRouter');
 
 const notFound = require('./middlewares/notFound');
 const handleErrors = require('./middlewares/handleErrors');
@@ -25,6 +26,7 @@ app.use('/api/login', loginRouter);
 app.use('/api/admin', userAdminRouter);
 app.use('/api/service', serviceRouter);
 app.use('/api/contact', contactRouter);
+app.use('/api/reservation', reservationRouter);
 
 app.use(notFound);
 app.use(handleErrors);
