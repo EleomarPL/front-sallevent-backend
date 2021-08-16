@@ -22,5 +22,22 @@ serviceRouter.post('/create-service', adminStractor, async(req, res, next) => {
     next(err);
   }
 });
+serviceRouter.put('/edit-service', adminStractor, async(req, res, next) => {
+  const {id, name, detail, price} = req.body;
+  try {
+    if (!(id && name && detail && price)) {
+      return res.status(400).json({
+        error: 'All parameters are required'
+      });
+    }
+    const editService = {
+      name, detail, price
+    };
+    const savedChangeUser = await Service.findByIdAndUpdate(id, editService, {new: true});
+    res.send(savedChangeUser);
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = serviceRouter;
