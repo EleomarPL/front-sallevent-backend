@@ -7,6 +7,12 @@ const SelectedServices = require('../models/SelectedServices');
 const Reservations = require('../models/Reservations');
 const Room = require('../models/Room');
 
+reservationRouter.get('/get-only-date-reservations', async(req, res) => {
+  const getDateReservation = await Reservations.find({});
+  const filterOnlyDate = getDateReservation.map(reservation => reservation.dateReservationStart);
+  res.send(filterOnlyDate);
+});
+
 reservationRouter.post('/create-reservation', adminStractor, async(req, res, next) => {
   const {totalServices, listSelectedServices = [], typeEvent, dateReservationStart, dateReservationEnd} = req.body;
   let idRoom = process.env.ID_ROOM;
