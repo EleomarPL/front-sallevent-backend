@@ -10,7 +10,12 @@ const Room = require('../models/Room');
 
 reservationRouter.get('/get-only-date-reservations', async(req, res) => {
   const getDateReservation = await Reservations.find({});
-  const filterOnlyDate = getDateReservation.map(reservation => reservation.dateReservationStart);
+  const filterOnlyDate = getDateReservation.map(reservation => {
+    return {
+      dateReservation: reservation.dateReservationStart,
+      statusReservation: reservation.statusReservation
+    };
+  });
   res.send(filterOnlyDate);
 });
 
