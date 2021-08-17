@@ -159,4 +159,38 @@ reservationRouter.put('/confirm-reservation', adminStractor, async(req, res, nex
   }
 });
 
+reservationRouter.delete('/delete-reservation', userStractor, async(req, res, next) => {
+  const {idReservation} = req.body;
+  const {userId: id} = req;
+
+  try {
+    const reservationData = await Reservations.findById(idReservation);
+
+    if (!reservationData) {
+      return res.status(404).json({
+        error: 'No reservation found'
+      });
+    } else if (reservationData.idUser.toString() !== id.toString()) {
+      return res.status(400).json({
+        error: 'This user is not valid'
+      });
+    } else if (reservationData.statusReservation === 1) {
+      return res.status(400).json({
+        error: 'This reservation cannot be deleted'
+      });
+    }
+
+    await SelectedServices.deleteMany({idFolioService: reservationData.idFolioServices});
+    await FolioServices.findById(reservationData.idFolioServices);
+
+    Reservations.findByIdAndRemove(idReservation).then(() => {
+      res.status(204).end();
+    }).catch(err => {
+      next(err);
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = reservationRouter;
