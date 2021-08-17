@@ -1,6 +1,7 @@
 const reservationRouter = require('express').Router();
 
 const userStractor = require('../middlewares/userStractor');
+const adminStractor = require('../middlewares/adminStractor');
 
 const FolioServices = require('../models/FolioServices');
 const SelectedServices = require('../models/SelectedServices');
@@ -132,6 +133,30 @@ reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) =
     next(err);
   }
 
+});
+reservationRouter.put('/confirm-reservation', adminStractor, async(req, res, next) => {
+  const {idReservation} = req.body;
+
+  try {
+    const reservationData = await Reservations.findById(idReservation);
+    if (!reservationData) {
+      return res.status(500).json({
+        error: 'Fail to find the room'
+      });
+    } else if (reservationData.statusReservation === 1) {
+      return res.status(400).json({
+        error: 'This reservation cannot be modified'
+      });
+    }
+    
+    const editReservation = {
+      statusReservation: 1
+    };
+    const savedChangeReservation = await Reservations.findByIdAndUpdate(idReservation, editReservation, {new: true});
+    res.send(savedChangeReservation);
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = reservationRouter;
