@@ -67,4 +67,71 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
 
 });
 
+reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) => {
+  const {totalServices, listSelectedServices = [], typeEvent, timeStart, timeEnd, idReservation} = req.body;
+  const {userId: id} = req;
+  let idRoom = process.env.ID_ROOM;
+
+  try {
+    if (!(totalServices && listSelectedServices && typeEvent && timeStart && timeEnd && idReservation)) {
+      return res.status(400).json({
+        error: 'All parameters are required'
+      });
+    }
+
+    const roomData = await Room.findById(idRoom);
+    if (!roomData) {
+      return res.status(500).json({
+        error: 'Fail to find the room'
+      });
+    }
+
+    const reservationData = await Reservations.findById(idReservation);
+    if (!reservationData) {
+      return res.status(500).json({
+        error: 'Fail to find the room'
+      });
+    } else if (reservationData.idUser.toString() !== id.toString()) {
+      return res.status(400).json({
+        error: 'This user is not valid'
+      });
+    } else if (reservationData.statusReservation === 1) {
+      return res.status(400).json({
+        error: 'This reservation cannot be modified'
+      });
+    }
+
+    await SelectedServices.deleteMany({idFolioService: reservationData.idFolioServices});
+
+    let createSelectedServices;
+    listSelectedServices.forEach(async(service) => {
+      createSelectedServices = new SelectedServices({
+        amountService: service.amountService,
+        totalService: service.totalService,
+        idService: service.id,
+        idFolioService: reservationData.idFolioServices
+      });
+      await createSelectedServices.save();
+    });
+
+    const editFolioService = {
+      totalServices
+    };
+    await FolioServices.findByIdAndUpdate(reservationData.idFolioServices, editFolioService, {new: true});
+    let _dateReservationStart = reservationData.dateReservationStart.toISOString().split('T');
+    let _dateReservationEnd = reservationData.dateReservationEnd.toISOString().split('T');
+    const editReservation = {
+      typeEvent,
+      priceTotal: totalServices + roomData.priceHour,
+      dateReservationStart: _dateReservationStart[0] + ' ' + timeStart + ':00:00.000Z',
+      dateReservationEnd: _dateReservationEnd[0] + ' ' + timeEnd + ':00:00.000Z'
+    };
+    const savedChangeReservation = await Reservations.findByIdAndUpdate(idReservation, editReservation, {new: true});
+    res.send(savedChangeReservation);
+  } catch (err) {
+    next(err);
+  }
+
+});
+
 module.exports = reservationRouter;
