@@ -21,6 +21,11 @@ reservationRouter.get('/get-reservations', userStractor, async(req, res) => {
   res.send(getReservationFromThisUser);
 });
 
+reservationRouter.get('/get-reservations-admin', adminStractor, async(req, res) => {
+  const getReservationFromThisUser = await Reservations.find({});
+  res.send(getReservationFromThisUser);
+});
+
 reservationRouter.post('/create-reservation', userStractor, async(req, res, next) => {
   const {totalServices, listSelectedServices = [], typeEvent, dateReservationStart, dateReservationEnd} = req.body;
   let idRoom = process.env.ID_ROOM;
