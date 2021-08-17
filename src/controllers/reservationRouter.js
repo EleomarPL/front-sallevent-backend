@@ -14,6 +14,13 @@ reservationRouter.get('/get-only-date-reservations', async(req, res) => {
   res.send(filterOnlyDate);
 });
 
+reservationRouter.get('/get-reservations', userStractor, async(req, res) => {
+  const {userId: id} = req;
+
+  const getReservationFromThisUser = await Reservations.find({idUser: id});
+  res.send(getReservationFromThisUser);
+});
+
 reservationRouter.post('/create-reservation', userStractor, async(req, res, next) => {
   const {totalServices, listSelectedServices = [], typeEvent, dateReservationStart, dateReservationEnd} = req.body;
   let idRoom = process.env.ID_ROOM;
