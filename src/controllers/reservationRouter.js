@@ -32,15 +32,42 @@ reservationRouter.get('/get-reservations-admin', adminStractor, async(req, res) 
 });
 
 reservationRouter.post('/create-reservation', userStractor, async(req, res, next) => {
-  const {totalServices, listSelectedServices = [], typeEvent, dateReservationStart, dateReservationEnd} = req.body;
+  const {listSelectedServices = [], typeEvent, timeStart, timeEnd, dateYYMMDD} = req.body;
   let idRoom = process.env.ID_ROOM;
   const {userId: id} = req;
   try {
-    if (!(totalServices && listSelectedServices && typeEvent && dateReservationStart && dateReservationEnd )) {
+    if (!(listSelectedServices && typeEvent && timeStart && timeEnd && dateYYMMDD )) {
       return res.status(400).json({
         error: 'All parameters are required'
       });
+    } else if (isNaN(timeStart) || isNaN(timeEnd)) {
+      return res.status(400).json({
+        error: 'The hours are not valid'
+      });
+    } else if (Number(timeStart) < 0 || Number(timeStart) > 24 || (Number(timeEnd) < 0 || Number(timeEnd) > 24)) {
+      return res.status(400).json({
+        error: 'Invalid hours'
+      });
+    } else if (timeStart >= timeEnd) {
+      return res.status(400).json({
+        error: 'The reservation time range is not valid'
+      });
+    } else if (dateYYMMDD.length !== 10) {
+      return res.status(400).json({
+        error: 'Date YYMMDD is not valid'
+      });
     }
+    
+    let totalServices = 0;
+    listSelectedServices.forEach(element => {
+      if (!(element.amountService && element.totalService && element.id)) {
+        return res.status(400).json({
+          error: 'Poorly formed service list'
+        });
+      }
+      if (Number(element.totalService))
+        totalServices += Number(element.totalService);
+    });
 
     const roomData = await Room.findById(idRoom);
     if (!roomData) {
@@ -68,8 +95,8 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
       typeEvent,
       statusReservation: 0,
       priceTotal: totalServices + roomData.priceHour,
-      dateReservationStart: dateReservationStart + ':00:00.000Z',
-      dateReservationEnd: dateReservationEnd + ':00:00.000Z',
+      dateReservationStart: `${dateYYMMDD} ${timeStart}:00:00.000Z`,
+      dateReservationEnd: `${dateYYMMDD} ${timeEnd}:00:00.000Z`,
       idUser: id,
       idFolioServices: savedFolioServices.id,
       idRoom
