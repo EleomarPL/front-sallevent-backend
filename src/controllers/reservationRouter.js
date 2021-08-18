@@ -44,7 +44,7 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
       return res.status(400).json({
         error: 'The hours are not valid'
       });
-    } else if (Number(timeStart) < 0 || Number(timeStart) > 24 || (Number(timeEnd) < 0 || Number(timeEnd) > 24)) {
+    } else if (Number(timeStart) < 0 || Number(timeStart) > 23 || (Number(timeEnd) < 0 || Number(timeEnd) > 23)) {
       return res.status(400).json({
         error: 'Invalid hours'
       });
@@ -113,14 +113,26 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
 });
 
 reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) => {
-  const {totalServices, listSelectedServices = [], typeEvent, timeStart, timeEnd, idReservation} = req.body;
+  const {listSelectedServices = [], typeEvent, timeStart, timeEnd, idReservation} = req.body;
   const {userId: id} = req;
   let idRoom = process.env.ID_ROOM;
 
   try {
-    if (!(totalServices && listSelectedServices && typeEvent && timeStart && timeEnd && idReservation)) {
+    if (!(listSelectedServices && typeEvent && timeStart && timeEnd && idReservation)) {
       return res.status(400).json({
         error: 'All parameters are required'
+      });
+    } else if (isNaN(timeStart) || isNaN(timeEnd)) {
+      return res.status(400).json({
+        error: 'The hours are not valid'
+      });
+    } else if (Number(timeStart) < 0 || Number(timeStart) > 23 || (Number(timeEnd) < 0 || Number(timeEnd) > 23)) {
+      return res.status(400).json({
+        error: 'Invalid hours'
+      });
+    } else if (timeStart >= timeEnd) {
+      return res.status(400).json({
+        error: 'The reservation time range is not valid'
       });
     }
 
@@ -145,6 +157,16 @@ reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) =
         error: 'This reservation cannot be modified'
       });
     }
+    let totalServices = 0;
+    listSelectedServices.forEach(element => {
+      if (!(element.amountService && element.totalService && element.id)) {
+        return res.status(400).json({
+          error: 'Poorly formed service list'
+        });
+      }
+      if (Number(element.totalService))
+        totalServices += Number(element.totalService);
+    });
 
     await SelectedServices.deleteMany({idFolioService: reservationData.idFolioServices});
 
@@ -163,13 +185,14 @@ reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) =
       totalServices
     };
     await FolioServices.findByIdAndUpdate(reservationData.idFolioServices, editFolioService, {new: true});
+
     let _dateReservationStart = reservationData.dateReservationStart.toISOString().split('T');
     let _dateReservationEnd = reservationData.dateReservationEnd.toISOString().split('T');
     const editReservation = {
       typeEvent,
       priceTotal: totalServices + roomData.priceHour,
-      dateReservationStart: _dateReservationStart[0] + ' ' + timeStart + ':00:00.000Z',
-      dateReservationEnd: _dateReservationEnd[0] + ' ' + timeEnd + ':00:00.000Z'
+      dateReservationStart: `${_dateReservationStart[0]} ${timeStart}:00:00.000Z`,
+      dateReservationEnd: `${_dateReservationEnd[0]} ${timeEnd}:00:00.000Z`
     };
     const savedChangeReservation = await Reservations.findByIdAndUpdate(idReservation, editReservation, {new: true});
     res.send(savedChangeReservation);

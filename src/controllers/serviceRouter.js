@@ -52,7 +52,7 @@ serviceRouter.post('/quotation', async(req, res, next) => {
       return res.status(400).json({
         error: 'The hours are not valid'
       });
-    } else if ((timeStart < 0 || timeStart > 24) && (timeEnd < 0 || timeEnd > 24)) {
+    } else if ((timeStart < 0 || timeStart > 23) && (timeEnd < 0 || timeEnd > 23)) {
       return res.status(400).json({
         error: 'Invalid hours'
       });
