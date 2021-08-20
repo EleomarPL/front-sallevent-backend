@@ -169,27 +169,37 @@ reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) =
       });
     }
     let totalServices = 0;
+    const allServices = await Service.find({});
+
     listSelectedServices.forEach(element => {
-      if (!(element.amountService && element.totalService && element.id)) {
+      if (!(element.amountService && element.id)) {
         return res.status(400).json({
           error: 'Poorly formed service list'
         });
       }
-      if (Number(element.totalService))
-        totalServices += Number(element.totalService);
+      let getServiceWithId = allServices.find(el => el.id === element.id);
+      if (Number(element.amountService) && getServiceWithId)
+        totalServices += Number(getServiceWithId.price) * Number(element.amountService);
     });
 
     await SelectedServices.deleteMany({idFolioService: reservationData.idFolioServices});
 
     let createSelectedServices;
     listSelectedServices.forEach(async(service) => {
-      createSelectedServices = new SelectedServices({
-        amountService: service.amountService,
-        totalService: service.totalService,
-        idService: service.id,
-        idFolioService: reservationData.idFolioServices
-      });
-      await createSelectedServices.save();
+      let totalThisService = 0;
+      let getServiceWithId = allServices.find(el => el.id === service.id);
+
+      if (Number(service.amountService) && getServiceWithId)
+        totalThisService = Number(getServiceWithId.price) * Number(service.amountService);
+      if (totalThisService !== 0) {
+        createSelectedServices = new SelectedServices({
+          amountService: service.amountService,
+          totalService: service.totalService,
+          idService: service.id,
+          idFolioService: reservationData.idFolioServices
+        });
+        await createSelectedServices.save();
+      }
     });
 
     const editFolioService = {
