@@ -7,6 +7,7 @@ const FolioServices = require('../models/FolioServices');
 const SelectedServices = require('../models/SelectedServices');
 const Reservations = require('../models/Reservations');
 const Room = require('../models/Room');
+const Service = require('../models/Services');
 
 reservationRouter.get('/get-only-date-reservations', async(req, res) => {
   const getDateReservation = await Reservations.find({});
@@ -59,14 +60,17 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
     }
     
     let totalServices = 0;
+
+    const allServices = await Service.find({});
     listSelectedServices.forEach(element => {
-      if (!(element.amountService && element.totalService && element.id)) {
+      if (!(element.amountService && element.id)) {
         return res.status(400).json({
           error: 'Poorly formed service list'
         });
       }
-      if (Number(element.totalService))
-        totalServices += Number(element.totalService);
+      let getServiceWithId = allServices.find(el => el.id === element.id);
+      if (Number(element.amountService) && getServiceWithId)
+        totalServices += Number(getServiceWithId.price) * Number(element.amountService);
     });
 
     const roomData = await Room.findById(idRoom);
@@ -82,13 +86,20 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
     let createSelectedServices;
     const savedFolioServices = await createFolioServices.save();
     listSelectedServices.forEach(async(service) => {
-      createSelectedServices = new SelectedServices({
-        amountService: service.amountService,
-        totalService: service.totalService,
-        idService: service.id,
-        idFolioService: savedFolioServices.id
-      });
-      await createSelectedServices.save();
+      let totalThisService = 0;
+      let getServiceWithId = allServices.find(el => el.id === service.id);
+
+      if (Number(service.amountService) && getServiceWithId)
+        totalThisService = Number(getServiceWithId.price) * Number(service.amountService);
+      if (totalThisService !== 0) {
+        createSelectedServices = new SelectedServices({
+          amountService: service.amountService,
+          totalService: totalThisService,
+          idService: service.id,
+          idFolioService: savedFolioServices.id
+        });
+        await createSelectedServices.save();
+      }
     });
 
     const newReservation = new Reservations({
