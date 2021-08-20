@@ -72,9 +72,11 @@ serviceRouter.post('/quotation', async(req, res, next) => {
     let totalTimeReservation = 0;
     let total = 0;
 
+    const allServices = await Service.find({});
     listServices.forEach(element => {
-      if (Number(element.totalService))
-        totalServices += Number(element.totalService);
+      let getServiceWithId = allServices.find(el => el.id === element.id);
+      if (Number(element.amountService) && getServiceWithId)
+        totalServices += Number(getServiceWithId.price) * Number(element.amountService);
     });
     
     totalTimeReservation += (timeEnd - timeStart) * roomData.priceHour;
