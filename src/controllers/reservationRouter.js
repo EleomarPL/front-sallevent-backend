@@ -26,6 +26,36 @@ reservationRouter.get('/get-only-reservation/:idReservation', userStractor, asyn
   const getReservation = await Reservations.findById(idReservation);
   res.send(getReservation);
 });
+
+reservationRouter.get('/get-reservation/:idReservation', userStractor, async(req, res) => {
+  const { idReservation } = req.params;
+
+  const getReservation = await Reservations.findById(idReservation);
+  if (!getReservation) {
+    return res.status(404).json({
+      error: 'Reservation Not Found'
+    });
+  }
+  const getServices = await SelectedServices.find({idFolioService: getReservation.idFolioServices});
+  let listServices = getServices.map(data => {
+    return {
+      id: data.idService[0],
+      amountService: data.amountService,
+      totalService: data.totalService
+    };
+  });
+  let dataToSend = {
+    id: getReservation.id,
+    typeEvent: getReservation.typeEvent,
+    timeStart: getReservation.dateReservationStart.toISOString().split('T')[1].split(':')[0],
+    timeEnd: getReservation.dateReservationEnd.toISOString().split('T')[1].split(':')[0],
+    dateYYMMDD: getReservation.dateReservationStart.toISOString().split('T')[0],
+    priceTotal: getReservation.priceTotal,
+    statusReservation: getReservation.statusReservation,
+    listServices
+  };
+  res.send(dataToSend);
+});
  
 reservationRouter.get('/get-reservations', userStractor, async(req, res) => {
   const {userId: id} = req;
@@ -65,7 +95,7 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
         error: 'Date YYMMDD is not valid'
       });
     }
-    
+
     let totalServices = 0;
 
     const allServices = await Service.find({});
