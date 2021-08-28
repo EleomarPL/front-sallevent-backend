@@ -37,7 +37,7 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
   let idRoom = process.env.ID_ROOM;
   const {userId: id} = req;
   try {
-    if (!(listSelectedServices && typeEvent && timeStart && timeEnd && dateYYMMDD )) {
+    if (!(listSelectedServices && typeEvent && !isNaN(timeStart) && timeEnd && dateYYMMDD )) {
       return res.status(400).json({
         error: 'All parameters are required'
       });
@@ -247,8 +247,8 @@ reservationRouter.put('/confirm-reservation', adminStractor, async(req, res, nex
   }
 });
 
-reservationRouter.delete('/delete-reservation', userStractor, async(req, res, next) => {
-  const {idReservation} = req.body;
+reservationRouter.delete('/delete-reservation/:idReservation', userStractor, async(req, res, next) => {
+  const { idReservation } = req.params;
   const {userId: id} = req;
 
   try {
