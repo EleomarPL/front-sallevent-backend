@@ -101,11 +101,11 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
         await createSelectedServices.save();
       }
     });
-
+    let totalTimeReservation = (timeEnd - timeStart) * roomData.priceHour;
     const newReservation = new Reservations({
       typeEvent,
       statusReservation: 0,
-      priceTotal: totalServices + roomData.priceHour,
+      priceTotal: totalServices + totalTimeReservation,
       dateReservationStart: `${dateYYMMDD} ${timeStart}:00:00.000Z`,
       dateReservationEnd: `${dateYYMMDD} ${timeEnd}:00:00.000Z`,
       idUser: id,
@@ -207,11 +207,13 @@ reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) =
     };
     await FolioServices.findByIdAndUpdate(reservationData.idFolioServices, editFolioService, {new: true});
 
+    let totalTimeReservation = (timeEnd - timeStart) * roomData.priceHour;
+
     let _dateReservationStart = reservationData.dateReservationStart.toISOString().split('T');
     let _dateReservationEnd = reservationData.dateReservationEnd.toISOString().split('T');
     const editReservation = {
       typeEvent,
-      priceTotal: totalServices + roomData.priceHour,
+      priceTotal: totalServices + totalTimeReservation,
       dateReservationStart: `${_dateReservationStart[0]} ${timeStart}:00:00.000Z`,
       dateReservationEnd: `${_dateReservationEnd[0]} ${timeEnd}:00:00.000Z`
     };
