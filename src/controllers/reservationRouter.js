@@ -20,6 +20,13 @@ reservationRouter.get('/get-only-date-reservations', async(req, res) => {
   res.send(filterOnlyDate);
 });
 
+reservationRouter.get('/get-only-reservation/:idReservation', userStractor, async(req, res) => {
+  const { idReservation } = req.params;
+
+  const getReservation = await Reservations.findById(idReservation);
+  res.send(getReservation);
+});
+ 
 reservationRouter.get('/get-reservations', userStractor, async(req, res) => {
   const {userId: id} = req;
 
