@@ -262,8 +262,8 @@ reservationRouter.put('/edit-reservation/:idReservation', userStractor, async(re
   }
 
 });
-reservationRouter.put('/confirm-reservation', adminStractor, async(req, res, next) => {
-  const {idReservation} = req.body;
+reservationRouter.put('/confirm-reservation/:idReservation', adminStractor, async(req, res, next) => {
+  const { idReservation } = req.params;
 
   try {
     const reservationData = await Reservations.findById(idReservation);
