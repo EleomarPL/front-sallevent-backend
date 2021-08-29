@@ -160,13 +160,14 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
 
 });
 
-reservationRouter.put('/edit-reservation', userStractor, async(req, res, next) => {
-  const {listSelectedServices = [], typeEvent, timeStart, timeEnd, idReservation} = req.body;
+reservationRouter.put('/edit-reservation/:idReservation', userStractor, async(req, res, next) => {
+  const { idReservation } = req.params;
+  const {listSelectedServices = [], typeEvent, timeStart, timeEnd} = req.body;
   const {userId: id} = req;
   let idRoom = process.env.ID_ROOM;
 
   try {
-    if (!(listSelectedServices && typeEvent && timeStart && timeEnd && idReservation)) {
+    if (!(listSelectedServices && typeEvent && timeStart && timeEnd)) {
       return res.status(400).json({
         error: 'All parameters are required'
       });
