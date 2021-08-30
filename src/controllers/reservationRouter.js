@@ -167,7 +167,7 @@ reservationRouter.put('/edit-reservation/:idReservation', userStractor, async(re
   let idRoom = process.env.ID_ROOM;
 
   try {
-    if (!(listSelectedServices && typeEvent && timeStart && timeEnd)) {
+    if (!(listSelectedServices && typeEvent && !isNaN(timeStart) && timeEnd)) {
       return res.status(400).json({
         error: 'All parameters are required'
       });
