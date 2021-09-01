@@ -4,6 +4,24 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const adminStractor = require('../middlewares/adminStractor');
 
+userAdminRouter.get('/get-users/', adminStractor, async(req, res, next) => {
+  try {
+    const getUsers = await User.find({type: 1});
+    res.send(getUsers);
+  } catch (err) {
+    next(err);
+  }
+});
+userAdminRouter.get('/get-users/:nameUser', adminStractor, async(req, res, next) => {
+  try {
+    const { nameUser } = req.params;
+    const regexQuery = new RegExp(`.*${nameUser}.*`, 'i');
+    const getUsers = await User.find({userName: regexQuery, type: 1});
+    res.send(getUsers);
+  } catch (err) {
+    next(err);
+  }
+});
 userAdminRouter.put('/edit-data-admin', adminStractor, async(req, res, next) => {
   const {
     name, lastName, motherLastName, phone, email, userName
