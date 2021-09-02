@@ -135,5 +135,20 @@ userAdminRouter.put('/edit-password-user/:idUser', adminStractor, async(req, res
     next(err);
   }
 });
+userAdminRouter.delete('/delete-user/:idUser', adminStractor, async(req, res, next) => {
+  const { idUser } = req.params;
+  const findUser = await User.findById(idUser);
+  if (findUser.type === 0) {
+    return res.status(400).json({
+      error: 'This user is not valid'
+    });
+  }
+
+  User.findByIdAndRemove(idUser).then(() => {
+    res.status(204).end();
+  }).catch(err => {
+    next(err);
+  });
+});
 
 module.exports = userAdminRouter;
