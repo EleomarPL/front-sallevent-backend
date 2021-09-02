@@ -76,5 +76,64 @@ userAdminRouter.put('/edit-password-admin/', adminStractor, async(req, res, next
     next(err);
   }
 });
+userAdminRouter.put('/edit-data-user/:idUser', adminStractor, async(req, res, next) => {
+  const {
+    name, lastName, motherLastName, phone, email, userName
+  } = req.body;
+  const { idUser } = req.params;
+  
+  try {
+    if (!(name && lastName && motherLastName && phone && email &&
+      userName)
+    ) {
+      return res.status(400).json({
+        error: 'All parameters are required'
+      });
+    }
+    const findUser = await User.findById(idUser);
+    if (findUser.type === 0) {
+      return res.status(400).json({
+        error: 'This user is not valid'
+      });
+    }
+    
+    const editUserByAdmin = {
+      name, lastName, motherLastName, phone,
+      email, userName
+    };
+    const savedChangeAdmin = await User.findByIdAndUpdate(idUser, editUserByAdmin, {new: true});
+    res.send(savedChangeAdmin);
+  } catch (err) {
+    next(err);
+  }
+});
+userAdminRouter.put('/edit-password-user/:idUser', adminStractor, async(req, res, next) => {
+  const { newPassword } = req.body;
+  const { idUser } = req.params;
+
+  try {
+    if (!newPassword) {
+      return res.status(400).json({
+        error: 'All parameters are required'
+      });
+    }
+    const findUser = await User.findById(idUser);
+    if (findUser.type === 0) {
+      return res.status(400).json({
+        error: 'This user is not valid'
+      });
+    }
+    
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    const editPasswordUser = {
+      password: passwordHash
+    };
+    const savedChangeAdmin = await User.findByIdAndUpdate(idUser, editPasswordUser, {new: true});
+    res.send(savedChangeAdmin);
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = userAdminRouter;
