@@ -8,6 +8,16 @@ serviceRouter.get('/get-all-services', async(req, res) => {
   const getAllServices = await Service.find({});
   res.send(getAllServices);
 });
+serviceRouter.get('/get-all-services/:nameService', async(req, res, next) => {
+  try {
+    const { nameService } = req.params;
+    const regexQuery = new RegExp(`.*${nameService}.*`, 'i');
+    const getServices = await Service.find({name: regexQuery});
+    res.send(getServices);
+  } catch (err) {
+    next(err);
+  }
+});
 serviceRouter.post('/create-service', adminStractor, async(req, res, next) => {
   const {name, detail, price} = req.body;
   try {
