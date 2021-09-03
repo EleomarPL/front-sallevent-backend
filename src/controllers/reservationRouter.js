@@ -65,7 +65,7 @@ reservationRouter.get('/get-reservations', userStractor, async(req, res) => {
 });
 
 reservationRouter.get('/get-reservations-admin', adminStractor, async(req, res) => {
-  const getReservationFromThisUser = await Reservations.find({});
+  const getReservationFromThisUser = await Reservations.find({}).populate('idUser');
   res.send(getReservationFromThisUser);
 });
 
