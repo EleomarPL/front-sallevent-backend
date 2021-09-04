@@ -33,10 +33,11 @@ serviceRouter.post('/create-service', adminStractor, async(req, res, next) => {
     next(err);
   }
 });
-serviceRouter.put('/edit-service', adminStractor, async(req, res, next) => {
-  const {id, name, detail, price} = req.body;
+serviceRouter.put('/edit-service/:idService', adminStractor, async(req, res, next) => {
+  const {name, detail, price} = req.body;
+  const { idService } = req.params;
   try {
-    if (!(id && name && detail && price)) {
+    if (!(idService && name && detail && price)) {
       return res.status(400).json({
         error: 'All parameters are required'
       });
@@ -44,7 +45,7 @@ serviceRouter.put('/edit-service', adminStractor, async(req, res, next) => {
     const editService = {
       name, detail, price
     };
-    const savedChangeUser = await Service.findByIdAndUpdate(id, editService, {new: true});
+    const savedChangeUser = await Service.findByIdAndUpdate(idService, editService, {new: true});
     res.send(savedChangeUser);
   } catch (err) {
     next(err);
