@@ -40,7 +40,17 @@ roomRouter.get('/get-info-room', async(req, res, next) => {
         path: 'idInfo',
         populate: 'idDirection idSchedule'
       });
-    res.send(getRoom);
+    res.send({
+      room: {
+        id: getRoom.id,
+        name: getRoom.name,
+        capacity: getRoom.capacity,
+        description: getRoom.description,
+        priceHour: getRoom.priceHour
+      },
+      schedule: getRoom.idInfo[0].idSchedule[0],
+      direction: getRoom.idInfo[0].idDirection[0]
+    });
   } catch (err) {
     next(err);
   }
@@ -79,11 +89,13 @@ roomRouter.put('/update-info-room', adminStractor, async(req, res, next) => {
     const savedUpdateRoom = await Room.findByIdAndUpdate(idRoomToUpdate, dataUpdateRoom, {new: true});
 
     res.send({
-      id: savedUpdateRoom.id,
-      name: savedUpdateRoom.name,
-      capacity: savedUpdateRoom.capacity,
-      description: savedUpdateRoom.description,
-      priceHour: savedUpdateRoom.priceHour,
+      room: {
+        id: savedUpdateRoom.id,
+        name: savedUpdateRoom.name,
+        capacity: savedUpdateRoom.capacity,
+        description: savedUpdateRoom.description,
+        priceHour: savedUpdateRoom.priceHour
+      },
       schedule: savedUpdateShedule,
       direction: savedUpdateDirecion
     });
