@@ -2,6 +2,7 @@ const roomRouter = require('express').Router();
 
 const Room = require('../models/Room');
 const InfoRoom = require('../models/InfoRoom');
+const Schedule = require('../models/Schedule');
 const Direction = require('../models/Direction');
 const User = require('../models/User');
 
@@ -25,6 +26,19 @@ roomRouter.get('/get-info-footer', async(req, res, next) => {
     return res.status(500).json({
       error: 'Internal Error'
     });
+  } catch (err) {
+    next(err);
+  }
+});
+roomRouter.get('/get-info-room', async(req, res, next) => {
+  const idRoom = process.env.ID_ROOM;
+  try {
+    const getRoom = await Room.findById(idRoom).
+      populate({
+        path: 'idInfo',
+        populate: 'idDirection idSchedule'
+      });
+    res.send(getRoom);
   } catch (err) {
     next(err);
   }
