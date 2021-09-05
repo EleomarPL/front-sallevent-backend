@@ -6,6 +6,8 @@ const Schedule = require('../models/Schedule');
 const Direction = require('../models/Direction');
 const User = require('../models/User');
 
+const adminStractor = require('../middlewares/adminStractor');
+
 roomRouter.get('/get-info-footer', async(req, res, next) => {
   const idRoom = process.env.ID_ROOM;
   try {
@@ -39,6 +41,53 @@ roomRouter.get('/get-info-room', async(req, res, next) => {
         populate: 'idDirection idSchedule'
       });
     res.send(getRoom);
+  } catch (err) {
+    next(err);
+  }
+});
+roomRouter.put('/update-info-room', adminStractor, async(req, res, next) => {
+  const idRoom = process.env.ID_ROOM;
+  const {
+    name, capacity, description, priceHour, street, state, municipality, suburb,
+    sunday, monday, tuesday, wednesday, thursday, friday, saturday
+  } = req.body;
+
+  try {
+    if (!(name && capacity && description && priceHour && street && state && municipality && suburb,
+    sunday && monday && tuesday && wednesday && thursday && friday && saturday)
+    ) {
+      return res.status(400).json({
+        error: 'All parameters are required'
+      });
+    }
+    let dataUpdateRoom = {
+      name, capacity, description, priceHour
+    };
+    let dataUpdateDirection = {
+      street, state, municipality, suburb
+    };
+    let dataUpdateSchedule = {
+      sunday, monday, tuesday, wednesday, thursday, friday, saturday
+    };
+    const getRoom = await Room.findById(idRoom).populate('idInfo');
+    let idRoomToUpdate = getRoom.id;
+    let idDirectionToUpdate = getRoom.idInfo[0].idDirection;
+    let idScheduleToUpdate = getRoom.idInfo[0].idSchedule;
+
+    const savedUpdateDirecion = await Direction.findByIdAndUpdate(idDirectionToUpdate, dataUpdateDirection, {new: true});
+    const savedUpdateShedule = await Schedule.findByIdAndUpdate(idScheduleToUpdate, dataUpdateSchedule, {new: true});
+    const savedUpdateRoom = await Room.findByIdAndUpdate(idRoomToUpdate, dataUpdateRoom, {new: true});
+
+    res.send({
+      id: savedUpdateRoom.id,
+      name: savedUpdateRoom.name,
+      capacity: savedUpdateRoom.capacity,
+      description: savedUpdateRoom.description,
+      priceHour: savedUpdateRoom.priceHour,
+      schedule: savedUpdateShedule,
+      direction: savedUpdateDirecion
+    });
+    res.send({getRoom, idRoomToUpdate, idDirectionToUpdate, idScheduleToUpdate});
   } catch (err) {
     next(err);
   }
