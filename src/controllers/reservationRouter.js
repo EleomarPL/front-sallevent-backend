@@ -69,6 +69,25 @@ reservationRouter.get('/get-reservations-admin', adminStractor, async(req, res) 
   res.send(getReservationFromThisUser);
 });
 
+reservationRouter.get('/verify-date-to-reservation', async(req, res, next) => {
+  const {dateYYMMDD} = req.body;
+  try {
+    if (!dateYYMMDD ) {
+      return res.status(400).json({
+        error: 'All parameters are required'
+      });
+    }
+    const getReservations = await Reservations.find({});
+    const getOnlyDates =
+      getReservations.map(reservation => reservation.dateReservationStart.toISOString().split('T')[0]);
+    let isBooked = getOnlyDates.includes(dateYYMMDD);
+    res.send(isBooked);
+
+  } catch (err) {
+    next(err);
+  }
+});
+
 reservationRouter.post('/create-reservation', userStractor, async(req, res, next) => {
   const {listSelectedServices = [], typeEvent, timeStart, timeEnd, dateYYMMDD} = req.body;
   let idRoom = process.env.ID_ROOM;
@@ -93,6 +112,16 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
     } else if (dateYYMMDD.length !== 10) {
       return res.status(400).json({
         error: 'Date YYMMDD is not valid'
+      });
+    }
+
+    const getReservations = await Reservations.find({});
+    const getOnlyDates =
+      getReservations.map(reservation => reservation.dateReservationStart.toISOString().split('T')[0]);
+    let isBooked = getOnlyDates.includes(dateYYMMDD);
+    if (isBooked) {
+      return res.status(406).json({
+        message: 'Already booked'
       });
     }
 
