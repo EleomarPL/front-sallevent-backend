@@ -90,7 +90,7 @@ reservationRouter.get('/verify-date-to-reservation', async(req, res, next) => {
       path: 'idInfo',
       populate: 'idSchedule'
     });
-    let days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    let days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     const getScheduleRoom = getInfoRoom.idInfo[0].idSchedule[0];
     const isOpen = getScheduleRoom[days[new Date(dateYYMMDD).getDay()]];
@@ -138,6 +138,24 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
         message: 'Already booked'
       });
     }
+    const roomData = await Room.findById(idRoom).populate({
+      path: 'idInfo',
+      populate: 'idSchedule'
+    });
+    if (!roomData) {
+      return res.status(500).json({
+        error: 'Fail to find the room'
+      });
+    }
+
+    let days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const getScheduleRoom = roomData.idInfo[0].idSchedule[0];
+    const isOpen = getScheduleRoom[days[new Date(dateYYMMDD).getDay()]];
+    if (isOpen === 'N') {
+      return res.status(406).json({
+        message: 'Non-working day'
+      });
+    }
 
     let totalServices = 0;
 
@@ -152,13 +170,6 @@ reservationRouter.post('/create-reservation', userStractor, async(req, res, next
       if (Number(element.amountService) && getServiceWithId)
         totalServices += Number(getServiceWithId.price) * Number(element.amountService);
     });
-
-    const roomData = await Room.findById(idRoom);
-    if (!roomData) {
-      return res.status(500).json({
-        error: 'Fail to find the room'
-      });
-    }
 
     const createFolioServices = new FolioServices({
       totalServices
