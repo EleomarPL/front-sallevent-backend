@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 
 const User = require('../models/User');
 const adminStractor = require('../middlewares/adminStractor');
+const SelectedServices = require('../models/SelectedServices');
+const FolioService = require('../models/FolioServices');
+const Reservation = require('../models/Reservations');
 
 userAdminRouter.get('/get-users/', adminStractor, async(req, res, next) => {
   try {
@@ -116,18 +119,31 @@ userAdminRouter.put('/edit-data-user/:idUser', adminStractor, async(req, res, ne
 });
 userAdminRouter.delete('/delete-user/:idUser', adminStractor, async(req, res, next) => {
   const { idUser } = req.params;
-  const findUser = await User.findById(idUser);
-  if (findUser.type === 0) {
-    return res.status(400).json({
-      error: 'This user is not valid'
-    });
-  }
+  try {
+    const findUser = await User.findById(idUser);
+    if (findUser.type === 0) {
+      return res.status(400).json({
+        error: 'This user is not valid'
+      });
+    }
+    const getReservationsUser = await Reservation.find({idUser});
+    if (getReservationsUser) {
+      getReservationsUser.forEach( async(reservation) => {
+        let idFolioServices = reservation.idFolioServices[0];
+        await SelectedServices.deleteMany({ idFolioService: idFolioServices });
+        await FolioService.findByIdAndRemove(idFolioServices);
+        await Reservation.findOneAndRemove({idFolioServices: idFolioServices});
+      });
+    }
 
-  User.findByIdAndRemove(idUser).then(() => {
-    res.status(204).end();
-  }).catch(err => {
+    User.findByIdAndRemove(idUser).then(() => {
+      res.status(204).end();
+    }).catch(err => {
+      next(err);
+    });
+  } catch (err) {
     next(err);
-  });
+  }
 });
 
 module.exports = userAdminRouter;
