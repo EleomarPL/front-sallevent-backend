@@ -8,6 +8,8 @@ const SelectedServices = require('../models/SelectedServices');
 const Reservations = require('../models/Reservations');
 const Room = require('../models/Room');
 const Service = require('../models/Services');
+const Schedule = require('../models/Schedule');
+const InfoRoom = require('../models/InfoRoom');
 
 reservationRouter.get('/get-only-date-reservations', async(req, res) => {
   const getDateReservation = await Reservations.find({});
@@ -71,6 +73,8 @@ reservationRouter.get('/get-reservations-admin', adminStractor, async(req, res) 
 
 reservationRouter.get('/verify-date-to-reservation', async(req, res, next) => {
   const {dateYYMMDD} = req.body;
+  let idRoom = process.env.ID_ROOM;
+
   try {
     if (!dateYYMMDD ) {
       return res.status(400).json({
@@ -80,8 +84,18 @@ reservationRouter.get('/verify-date-to-reservation', async(req, res, next) => {
     const getReservations = await Reservations.find({});
     const getOnlyDates =
       getReservations.map(reservation => reservation.dateReservationStart.toISOString().split('T')[0]);
-    let isBooked = getOnlyDates.includes(dateYYMMDD);
-    res.send(isBooked);
+    const isBooked = getOnlyDates.includes(dateYYMMDD);
+
+    const getInfoRoom = await Room.findById(idRoom).populate({
+      path: 'idInfo',
+      populate: 'idSchedule'
+    });
+    let days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+    const getScheduleRoom = getInfoRoom.idInfo[0].idSchedule[0];
+    const isOpen = getScheduleRoom[days[new Date(dateYYMMDD).getDay()]];
+
+    res.send({isOpen, isBooked: isBooked ? 'Y' : 'N'});
 
   } catch (err) {
     next(err);
