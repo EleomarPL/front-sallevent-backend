@@ -71,8 +71,8 @@ reservationRouter.get('/get-reservations-admin', adminStractor, async(req, res) 
   res.send(getReservationFromThisUser);
 });
 
-reservationRouter.get('/verify-date-to-reservation', async(req, res, next) => {
-  const {dateYYMMDD} = req.body;
+reservationRouter.get('/verify-date-to-reservation/:dateYYMMDD', async(req, res, next) => {
+  const {dateYYMMDD} = req.params;
   let idRoom = process.env.ID_ROOM;
 
   try {
