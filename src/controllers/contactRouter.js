@@ -1,5 +1,6 @@
 const contactRouter = require('express').Router();
 
+const adminStractor = require('../middlewares/adminStractor');
 const Contact = require('../models/Contac');
 
 contactRouter.post('/send-contact', async(req, res, next) => {
@@ -23,6 +24,18 @@ contactRouter.post('/send-contact', async(req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+contactRouter.get('/get-all-messages', adminStractor, async(req, res) => {
+  const getMessagesContact = (await Contact.find({})).reverse();
+  res.send(getMessagesContact);
+});
+contactRouter.delete('/delete-message-contact/:idMessage', adminStractor, (req, res, next) => {
+  const {idMessage} = req.params;
+  Contact.findByIdAndRemove(idMessage).then(() => {
+    res.status(204).end();
+  }).catch(err => {
+    next(err);
+  });
 });
 
 module.exports = contactRouter;
