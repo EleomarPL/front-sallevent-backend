@@ -39,7 +39,7 @@ Les recomiendo no compartir estos datos
 Tal vez suene muy obvio pero primero clone el repositorio
 
 ```
-    git clone https://github.com/EleomarPL/grade-control-backend
+    git clone https://github.com/EleomarPL/front-sallevent-backend
 ```
 
 Instale las dependencias. Las depedencias ya se encuentran implicitas en el Package del proyecto, solo basta ejecutar la siguiente instrucción:
