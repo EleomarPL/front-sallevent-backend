@@ -1,15 +1,10 @@
-const mongoose = require('mongoose');
+const {connect} = require('mongoose');
 
 const stringConnection = process.env.MONGODB_URI;
 
-mongoose.connect(stringConnection, {
-  useCreateIndex: true,
-  useFindAndModify: false,
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).
+connect(stringConnection).
   then( () => {
     console.log('conectado');
   }).catch( err => {
-    console.err(err);
+    console.log(err);
   });
