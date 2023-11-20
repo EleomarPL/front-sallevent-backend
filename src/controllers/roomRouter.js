@@ -14,7 +14,7 @@ roomRouter.get('/get-info-footer', async(req, res, next) => {
 
     const getData = await Room.findById(idRoom).populate('idInfo');
     const directionRoom = await Direction.findById(getData.idInfo[0].idDirection[0]);
-    const getAdmin = await User.findOne({type: 1});
+    const getAdmin = await User.findOne({type: 0});
     if (directionRoom && getAdmin) {
       const dataToSend = {
         email: getAdmin.email,
